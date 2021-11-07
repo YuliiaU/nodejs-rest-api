@@ -3,7 +3,10 @@ const { NotFound } = require('http-errors')
 const { Contact } = require('../models')
 
 const listContacts = async (req, res) => {
-  const contacts = await Contact.find({}, '_id name email phone favorite')
+  const { page = 1, limit = 2 } = req.query
+  const skip = (page - 1) * limit
+  const { _id } = req.user
+  const contacts = await Contact.find({ owner: _id }, '_id name email phone', { skip, limit: +limit }).populate('owner', 'email')
   res.json({
     status: 'success',
     code: 200,
@@ -14,10 +17,11 @@ const listContacts = async (req, res) => {
 }
 
 const getContactById = async (req, res) => {
-  const { id } = req.params
-  const contact = await Contact.findById(id)
+  const { _id } = req.params
+  const contactId = req.params.contactId
+  const contact = await Contact.findById({ _id: contactId, owner: _id })
   if (!contact) {
-    throw new NotFound(`Contact with id = ${id} not found`)
+    throw new NotFound(`Contact with id = ${contactId} not found`)
   }
   res.json({
     status: 'success',
@@ -29,12 +33,13 @@ const getContactById = async (req, res) => {
 }
 
 const addContact = async (req, res) => {
-  const newContact = await Contact.create(req.body)
+  const newContact = { ...req.body, owner: req.user._id }
+  const result = await Contact.create(newContact)
   res.status(201).json({
     status: 'success',
     code: 201,
     data: {
-      newContact
+      result
     }
   })
 }
