@@ -14,7 +14,7 @@ const updateAvatar = async (req, res, next) => {
     await User.findByIdAndUpdate(_id, { avatarURL: image })
     res.status(200).json({
       ctatus: 'success',
-      code: 2010,
+      code: 200,
       message: 'Update avatar success'
     })
   } catch (error) {
