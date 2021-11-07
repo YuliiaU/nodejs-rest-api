@@ -1,5 +1,5 @@
 const path = require('path')
-const fs = require('fs/promises')
+const fs = require('fs').promises
 const { User } = require('../../models')
 
 const updateAvatar = async (req, res, next) => {
